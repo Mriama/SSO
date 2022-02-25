@@ -1,0 +1,27 @@
+* {
+ font-family: Verdana;
+}
+
+.col-lg-12{
+	text-align:center;
+}
+
+h1{
+	font-size:20px;
+}
+
+h2{
+	font-size:18px;
+}
+
+.left{
+	text-align:left;
+}
+
+.right{
+	text-align:right;
+}
+
+select{
+	width:150px;
+}

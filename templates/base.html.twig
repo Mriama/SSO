@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>SSO</title>
+<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<script src="js/jquery-1.12.3.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        {% block stylesheets %}{% endblock %}
+
+        {% block javascripts %}{% endblock %}
+    </head>
+    <body>
+        {% block body %}
+        <input type="hidden" id="urlTargetSSO" name="urlTargetSSO" value=""/>
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-12"><h1>Connexion SSO</h1></div>
+			</div>
+			<div class="row">
+				<div class="col-lg-12"><h2>Simulation avec profil</h2></div>
+			</div>
+				<div class="row">
+					<div class="col-lg-6 right">
+						<label>Application : </label>
+					</div>
+					<div class="col-lg-6">
+						<select name="application" id="application" required>
+							<option value="null"></option>
+							{% for appli in applications %}
+								<option value="{{appli.idApplication}}"id="application">{{appli.nomApplication}}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-lg-6 right">
+						<label>Profil : </label>
+					</div>
+					<div class="col-lg-6">
+						<select name="profil" id="profil" required>	
+						</select>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-lg-12"><input type="button" name="connexionSSO" id="connexionSSO" value=">>> SSO <<<" /></div>
+				</div>
+			</div>
+		</div>
+        {% endblock %}
+		<script>
+		var objHeader; // stocke le retour json de l'appel ajax pour récupérer les infos sur un utilisateur
+		var urlTargetSSO = "http://localhost:8000/";
+
+			function ajaxQueue(step, id)
+				{
+					switch(step)
+					{
+						case 0: 
+							$.ajax(
+							{
+								url : 'user',
+								type : 'GET',
+								data : 'id=' + id,
+								dataType : 'json',
+								success : function(data)
+								{
+									console.log(data)
+									data["ct-remote-user"] = data.ctremoteuser;
+									delete data.ctremoteuser;
+									objHeader = data;
+									ajaxQueue(1, id);
+								}
+							}
+							);
+							break;
+						case 1:
+							$.ajax(
+							{
+								type : 'POST',
+								url : $('#urlTargetSSO').attr('value'),
+								headers : objHeader,
+								success : function(data)
+								{
+									//header("Content-type: application/json");
+									var url = window.location.href = $('#urlTargetSSO').attr('value');
+									var myRequest = new XMLHttpRequest();
+									myRequest.open('POST', url ,false);
+									myRequest.setHeader('Content-type','application/json');
+									myRequest.send();
+									
+								} 
+							});
+							break;
+					}
+				}
+
+			function getInfoUtilisateur(id) {
+				ajaxQueue(0, id);
+			}
+			function loadProfil()
+			{
+				var idApplication = $("#application").val();
+				$("#profil").empty();
+				$.ajax({
+					type : "get",
+					url : "profil",
+					data:{idApplication},
+					dataType: "json",
+					success: function(data){
+						$.each(data, function(key, element)
+								{
+								var option = $('<option id="user"></option>');
+								$.each(element, function(key, element){
+									switch(key)
+									{
+								    case "idUtilisateur":
+								    	option.attr("value", element);
+								        break;
+								    case "ctremoteuser":
+								    	option.text(element);
+								        break;
+									}
+								});
+				    			$("#profil").append(option);
+						});
+						
+					}
+         		})
+			}
+			function changeTargetSSO(idAppli){
+				console.log('hgk')
+				$.ajax(
+						{
+							url : 'alias-appli',
+							type : 'GET',
+							data : 'idAppli=' + idAppli,
+							success : function(data)
+							{
+								$('#urlTargetSSO').attr('value', urlTargetSSO + data.aliasApplication);
+							} 
+						}
+				);
+			}
+			$(document).ready(function() {
+				$("#connexionSSO").click(function(e){
+				var profil = $("#profil").val();		
+				getInfoUtilisateur(profil);
+				})
+
+				$('#application').change(function(){
+					loadProfil();
+					changeTargetSSO($(this).val());
+				})
+			})
+
+
+		</script>
+    </body>
+</html>
