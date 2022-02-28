@@ -90,7 +90,7 @@
 									var url = window.location.href = $('#urlTargetSSO').attr('value');
 									var myRequest = new XMLHttpRequest();
 									myRequest.open('POST', url ,false);
-									myRequest.setHeader('Content-type','application/json');
+									myRequest.setRequestHeader('headers', objHeader);
 									myRequest.send();
 									
 								} 
