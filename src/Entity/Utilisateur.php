@@ -258,4 +258,21 @@ class Utilisateur
 
         return $this;
     }
+
+    public function getHeadersData() {
+        return [
+            "idUtilisateur" => $this->idUtilisateur, 
+            "ct-remote-user" => $this->ctremoteuser, 
+            "ctln" => $this->ctln, 
+            "ctfn" => $this->ctfn, 
+            "fredurneresp" => $this->fredurneresp, 
+            "freduresdel" => $this->freduresdel, 
+            "fredufonctadm" => $this->fredufonctadm, 
+            "fredugestresp" => $this->fredugestresp, 
+            "ctemail" => $this->ctemail, 
+            "codaca" => $this->codaca, 
+            "freduurlretour" => $this->freduurlretour, 
+            "ctgrps" => $this->ctgrps, 
+        ];
+    }
 }
